@@ -1,7 +1,6 @@
 var canvas = document.getElementById('touch-canvas');
 var ctx = canvas.getContext('2d');
-var label = document.getElementById('value-label');
-label.innerHTML = "calibrate";
+var wrapper = document.getElementById('wrapper');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -14,13 +13,12 @@ canvas.addEventListener('gesturestart', function (e) {
 
 //move to inputer objects
 var callibrationTimer;
-var counter = 0;
 
 var particles = [];
 var colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#900C3F'];
 var inputers = [];
 
-function addInputer(touch){
+function createInputer(touch){
 	return {
 		type: "twist",
 		position: {
@@ -32,9 +30,38 @@ function addInputer(touch){
 			y: touch.clientY
 		},
 		value: 0,
-		angle: 0,
-		callibrated: false
+        angle: 0,
+        angleValue: 0,
+        callibrated: false
 	};
+}
+
+function createLabel(inputer){
+    console.log(inputer.position.x);
+    var dialLabel = document.createElement("div");
+    dialLabel.setAttribute("class", "dial-label");
+    dialLabel.innerHTML = "<p class='position'>position: " + String(inputer.position.x) + ", " + String(inputer.position.y) + "</p>"
+    + "<p class='value'>value: " + String(inputer.value) + "</p>"
+    + "<p class='angle'>angle: " + String(inputer.angle) + "</p>";
+    wrapper.appendChild(dialLabel);  
+    dialLabel.style.left = String(inputer.position.x + 130)+"px";
+    dialLabel.style.top = String(inputer.position.y - 50)+"px";
+    return dialLabel;
+}
+
+function updatePositionLabel(inputer){
+    var label = inputer.label;
+    var positionLabel = label.getElementsByClassName('position');
+    positionLabel.innerHTML = "position: "+ String(inputer.position.x) + ", " + String(inputer.position.y);
+}
+
+function updateValueAndAngleLabel(inputer){
+    console.log(inputer.value);
+    var label = inputer.label;
+    var valueLabel = label.getElementsByClassName('value');
+    valueLabel[0].innerHTML = "value: " + String(Math.floor(inputer.value));
+    var angleLabel = label.getElementsByClassName('angle');
+    angleLabel[0].innerHTML = "angle: " + String(Math.floor(inputer.angle));
 }
 
 function getDistance (x1, y1, x2, y2){
@@ -53,10 +80,28 @@ function whichInputer(touch){
 			return inputers[i];
 		}
 	}
-	//not near an existing inputer. add a new one
-	inputers.push(addInputer(touch));
-	return inputers[inputers.length-1];
+    //not near an existing inputer. add a new one
+    var newInputer = createInputer(touch)
+    inputers.push(newInputer);
+    newInputer.label = createLabel(newInputer);
+	return newInputer;
 }
+
+//remove. just for testing with click.
+canvas.addEventListener('click', function(event) {
+	var inputer = {};
+    var touch = event;
+    //find closest inputer or make a new one
+    inputer = whichInputer(touch);
+    if(!inputer.callibrated){
+        callibrationTimer = window.setTimeout(function (){
+            inputer.callibrated = true;
+        }, 2000);
+    }else{
+        inputer.latestTouch.x = touch.clientX;
+        inputer.latestTouch.y = touch.clientY;
+    }
+}, false);
 
 canvas.addEventListener('touchmove', function(event) {
 	var inputer = {};
@@ -70,8 +115,21 @@ canvas.addEventListener('touchmove', function(event) {
 			}, 2000);
 	  	}else{
 	  		inputer.latestTouch.x = touch.clientX;
-	  		inputer.latestTouch.y = touch.clientY;
-	  	};
+            inputer.latestTouch.y = touch.clientY;
+            var angle = Math.atan2(inputer.latestTouch.x - inputer.position.x, inputer.latestTouch.y - inputer.position.y);
+            var angleValue = 100 - (((angle / Math.PI)*50) + 50);
+            var increment = angleValue - inputer.angleValue;
+            if(increment < -98){
+                increment = 0;
+            }
+            if(increment > 98){
+                increment = 0;
+            }
+            inputer.angle = 180 - ((angle / Math.PI)*180);
+            inputer.value += increment;
+            inputer.angleValue = angleValue;
+            updateValueAndAngleLabel(inputer);
+	  	}
 	}
 }, false);
 
@@ -123,19 +181,13 @@ function loop () {
 			var pointX = Math.cos(angle) * 150 + inputer.position.x;
 			var pointY = Math.sin(angle) * 150 + inputer.position.y;
 			ctx.lineTo(pointX, pointY);
-			ctx.stroke();
-			// var angleDegrees = (angle * Math.PI)/180
-			// angleChange = angleDegrees - lastAngle;
-			// counter += angleChange;
-			// label.innerHTML = counter;
-			// lastAngle = angleDegrees;
+            ctx.stroke();
 			for(var j = 0; j < 10; j++){
 				if(Math.random() < 0.2){
 				  	createParticle(inputer);
 			  	}
 		  	}
-	  	};
-		
+	  	}
 	}
   	updateParticles();
 	window.requestAnimationFrame(loop);	
