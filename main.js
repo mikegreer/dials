@@ -1,26 +1,23 @@
 var canvas = document.getElementById('touch-canvas');
 var ctx = canvas.getContext('2d');
-
 var label = document.getElementById('value-label');
-
 label.innerHTML = "calibrate";
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 //removing default scrolling and scaling
 document.addEventListener('touchstart', function(e) {e.preventDefault()}, false);
 document.addEventListener('touchmove', function(e) {e.preventDefault()}, false);
-
 canvas.addEventListener('gesturestart', function (e) {
     e.preventDefault();
 });
 
-//move to inputer objects?
+//move to inputer objects
 var callibrationTimer;
 var counter = 0;
 
-
+var particles = [];
+var colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#900C3F'];
 var inputers = [];
 
 function addInputer(touch){
@@ -46,6 +43,7 @@ function getDistance (x1, y1, x2, y2){
 	return Math.sqrt(dx * dx + dy * dy);
 }
 
+//find closest inputer or make a new one
 function whichInputer(touch){
 	//determine which inputer touch is from
 	for(var i = 0; i < inputers.length; i++){
@@ -58,7 +56,6 @@ function whichInputer(touch){
 	//not near an existing inputer. add a new one
 	inputers.push(addInputer(touch));
 	return inputers[inputers.length-1];
-	
 }
 
 canvas.addEventListener('touchmove', function(event) {
@@ -78,9 +75,6 @@ canvas.addEventListener('touchmove', function(event) {
 	}
 }, false);
 
-var particles = [];
-var colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F', '#900C3F'];
-
 function createParticle (inputer) {
 	particle = {
 		x: inputer.latestTouch.x,
@@ -89,7 +83,6 @@ function createParticle (inputer) {
 		dy: Math.sin(Math.atan2(inputer.latestTouch.y - inputer.position.y, inputer.latestTouch.x - inputer.position.x) + Math.random()*1 - 0.5),
 		radius: Math.floor(Math.random()*20),
 		color: colors[Math.floor(Math.random() * colors.length)]
-
 	}
 	particles.push(particle);
 }
