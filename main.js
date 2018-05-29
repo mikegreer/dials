@@ -36,8 +36,7 @@ function createInputer(touch){
 	};
 }
 
-function createLabel(inputer){
-    console.log(inputer.position.x);
+function createLabel(inputer) {
     var dialLabel = document.createElement("div");
     dialLabel.setAttribute("class", "dial-label");
     dialLabel.innerHTML = "<p class='position'>position: " + String(inputer.position.x) + ", " + String(inputer.position.y) + "</p>"
@@ -49,14 +48,13 @@ function createLabel(inputer){
     return dialLabel;
 }
 
-function updatePositionLabel(inputer){
+function updatePositionLabel(inputer) {
     var label = inputer.label;
     var positionLabel = label.getElementsByClassName('position');
     positionLabel.innerHTML = "position: "+ String(inputer.position.x) + ", " + String(inputer.position.y);
 }
 
-function updateValueAndAngleLabel(inputer){
-    console.log(inputer.value);
+function updateValueAndAngleLabel(inputer) {
     var label = inputer.label;
     var valueLabel = label.getElementsByClassName('value');
     valueLabel[0].innerHTML = "value: " + String(Math.floor(inputer.value));
