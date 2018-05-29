@@ -85,22 +85,6 @@ function whichInputer(touch){
 	return newInputer;
 }
 
-//remove. just for testing with click.
-canvas.addEventListener('click', function(event) {
-	var inputer = {};
-    var touch = event;
-    //find closest inputer or make a new one
-    inputer = whichInputer(touch);
-    if(!inputer.callibrated){
-        callibrationTimer = window.setTimeout(function (){
-            inputer.callibrated = true;
-        }, 2000);
-    }else{
-        inputer.latestTouch.x = touch.clientX;
-        inputer.latestTouch.y = touch.clientY;
-    }
-}, false);
-
 canvas.addEventListener('touchmove', function(event) {
 	var inputer = {};
 	for (var i = 0; i < event.touches.length; i++) {
